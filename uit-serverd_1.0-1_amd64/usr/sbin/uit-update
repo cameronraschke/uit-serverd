@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+systemctl stop uit-api
+
 uitServerdDir=$(mktemp -d)
 uitAPIDir=$(mktemp -d)
 uitWebDir=$(mktemp -d)

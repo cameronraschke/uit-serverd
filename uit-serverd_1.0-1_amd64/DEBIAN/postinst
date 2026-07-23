@@ -12,15 +12,15 @@ fi
 
 if [[ -n $(dpkg -s uit-api 2>/dev/null) ]]; then
 	# Directory contains old inventory images, can't purge until they're migrated
-	apt remove -y uit-api
+	dpkg --remove uit-api || true
 fi
 if [[ -n $(dpkg -s uit-client 2>/dev/null) ]]; then
 	# No important data, can purge
-	apt remove --purge -y uit-client
+	dpkg --purge uit-client || true
 fi
 if [[ -n $(dpkg -s uit-web 2>/dev/null) ]]; then
 	# Might contain important date, can't purge until I check
-	apt remove -y uit-web
+	dpkg --remove uit-web || true
 fi
 
 ## Users and groups
