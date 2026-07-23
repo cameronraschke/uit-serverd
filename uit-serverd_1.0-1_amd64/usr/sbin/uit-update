@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+trap cleanup EXIT
+
+if [[ "$EUID" > 0 ]]; then 
+  echo "Please run as root. Exiting..."
+  exit 0
+fi
+
+downloadFromGithub="${1:-Y}"
+
+if [[ -z $downloadFromGithub ]]; then
+	read -p "Download from GitHub? [Y/n]: " downloadFromGithub
+fi
+
+uitServerdDir=$(mktemp -d)
+uitAPIDir=$(mktemp -d)
+uitWebDir=$(mktemp -d)
+uitClientDir=$(mktemp -d)
+
+function tryGithubDownload(repoName, destDir) {
+	rm -rf "$destDir"
+	echo "Downloading $repoName from GitHub..."
+	git clone "https://github.com/cameronraschke/${repoName}" "$destDir"
+	gitStaus=$?
+	local i=10
+	while [ $gitStatus -ne 0 ] && [ $i -gt 0 ]; do
+		echo "Download failed, retrying..."
+		sleep 1
+		rm -rf "$destDir"
+		git clone "https://github.com/cameronraschke/${repoName}" "$destDir"
+		gitStatus=$?
+		((i--))
+	done
+	if [[ $gitStatus -ne 0 ]]; then
+		echo "Download of '${repoName}' failed after ${i} attempts. Exiting..."
+		exit 1
+	fi
+}
+
+function installPackage(packageDir, packageName) {
+	if [[ -z $packageDir || -z $packageName ]]; then
+		echo "installPackage() requires two arguments: packageDir and packageName. Exiting..."
+		exit 1
+	fi
+
+	if [[ -n $(dpkg -s $packageName 2>/dev/null) ]]; then
+		if [[ $packageName == "uit-client" ]]; then
+			# No important data, can purge
+			dpkg --purge uit-client
+		else
+			dpkg --remove remove "$packageName"
+	fi
+
+	if [[ -d "$packageDir" ]]; then
+		(cd "$packageDir"
+		chmod 755 "$packageDir/DEBIAN"
+		chmod 755 "$packageDir/DEBIAN/control"
+		chmod 755 "$packageDir/DEBIAN/postinst"
+		dpkg-deb --build --root-owner-group "$packageDir"
+		packagePath="$packageDir.deb")
+		if [[ -f "$packagePath" ]]; then
+			echo "Installing package '$packageName' from '$packagePath'..."
+			if [[ $packageName == "uit-client" ]]; then
+				mv -v "$packagePath" /srv/uit-toolbox/client/pkg/uit-toolbox-client.deb
+			fi
+			dpkg --install "$packagePath"
+		else
+			echo "Package '$packageName' not found at '$packagePath'. Exiting..."
+			exit 1
+		fi
+	fi
+}
+
+function cleanup() {
+	rm -rf "$uitAPIDir"
+	rm -rf "$uitWebDir"
+	rm -rf "$uitClientDir"
+}
+
+if [[ -z $downloadFromGithub || $downloadFromGithub == "y" || $downloadFromGithub == "Y" ]]; then
+  rm -r /tmp/uit-toolbox/
+  tryGithubDownload "uit-api" "$uitAPIDir"
+	tryGithubDownload "uit-web" "$uitWebDir"
+	tryGithubDownload "uit-client" "$uitClientDir"
+	tryGithubDownload "uit-serverd" "$uitServerdDir"
+  echo "Download complete."
+else 
+  echo "Not downloading."
+fi
+
+# installPackage skips installation of client package on server
+intallPackage "$uitClientDir/uit-client_2.0-1_amd64" "uit-web"
+installPackage "$uitAPIDir/uit-api_1.0-1_amd64" "uit-api"
+intallPackage "$uitWebDir/uit-web_1.0-1_amd64" "uit-web"
+installPackage "$uitServerdDir/uit-serverd_1.0-1_amd64" "uit-serverd"
+
+
+## Create Golang binaries
+# Server daemon (uit-api) managed by systemd, compilation in postinst script. Daemon NOT started until end of this script.
+# Client daemon & CLI
+rm /srv/uit-toolbox/client/pkg/uit-clientd
+(cd ${uitClientDir}/uit-client_2.0-1_amd64/opt/uit-toolbox/uit-clientd/
+	sudo /usr/local/go/bin/go build -buildvcs=false -o /srv/uit-toolbox/client/pkg/uit-clientd .
+	sudo /usr/local/go/bin/go build -buildvcs=false -o /srv/uit-toolbox/client/pkg/uit-cli ./cmd/uit-cli
+)
+
+systemctl daemon-reload
+systemctl enable --now uit-serverd
