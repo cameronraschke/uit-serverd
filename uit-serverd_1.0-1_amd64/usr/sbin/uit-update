@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-systemctl stop uit-api
+systemctl disable --now uit-api
 
 uitServerdDir=$(mktemp -d)
 uitAPIDir=$(mktemp -d)
