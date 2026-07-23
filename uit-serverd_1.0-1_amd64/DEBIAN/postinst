@@ -124,6 +124,8 @@ done
 
 ## Web server setup
 # Certs
+chmod 750 /usr/sbin/uit-*
+chown root:uit /usr/sbin/uit-*
 if [[ -x /usr/sbin/uit-update-certs ]]; then
 	if [[ ! -f /usr/local/share/ca-certificates/uit-ca.crt ]]; then
 		uit-update-certs --update-ca
@@ -170,9 +172,6 @@ find /etc/uit-toolbox/ -type f -exec chmod 640 {} \;
 find /srv/uit-toolbox/ ! -path "/srv/uit-toolbox/client/iso" ! -path "/srv/uit-toolbox/client/iso/*" -exec chown uitweb:uit {} \;
 find /srv/uit-toolbox/ -type d -not -path "*/iso*" -exec chmod 750 {} \;
 find /srv/uit-toolbox/ -type f -not -path "*/iso/*" -exec chmod 640 {} \;
-
-chmod 750 /usr/sbin/uit-*
-chown root:uit /usr/sbin/uit-*
 
 find /srv/nfs/ -type d -exec chmod 755 {} \;
 chown nobody:nogroup /srv/nfs/uit-toolbox/images -R
