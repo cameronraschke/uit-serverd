@@ -124,7 +124,7 @@ done
 
 ## Web server setup
 # Certs
-if [[ -n $(which uit-update-certs 2>/dev/null) ]]; then
+if [[ -x /usr/sbin/uit-update-certs ]]; then
 	if [[ ! -f /usr/local/share/ca-certificates/uit-ca.crt ]]; then
 		uit-update-certs --update-ca
 	fi
