@@ -1,4 +1,25 @@
 #!/usr/bin/env bash
+
+uitServerdDir=$(mktemp -d)
+uitAPIDir=$(mktemp -d)
+uitWebDir=$(mktemp -d)
+uitClientDir=$(mktemp -d)
+
+function cleanup() {
+	if [[ -d "$uitAPIDir" ]]; then
+		rm -rf "$uitAPIDir"
+	fi
+	if [[ -d "$uitWebDir" ]]; then
+		rm -rf "$uitWebDir"
+	fi
+	if [[ -d "$uitClientDir" ]]; then
+		rm -rf "$uitClientDir"
+	fi
+	if [[ -d "$uitServerdDir" ]]; then
+		rm -rf "$uitServerdDir"
+	fi
+}
+
 trap cleanup EXIT
 
 if [[ "$EUID" > 0 ]]; then 
@@ -12,18 +33,15 @@ if [[ -z $downloadFromGithub ]]; then
 	read -p "Download from GitHub? [Y/n]: " downloadFromGithub
 fi
 
-uitServerdDir=$(mktemp -d)
-uitAPIDir=$(mktemp -d)
-uitWebDir=$(mktemp -d)
-uitClientDir=$(mktemp -d)
-
-function tryGithubDownload(repoName, destDir) {
+function tryGithubDownload() {
+	local repoName="$1"
+	local destDir="$2"
 	rm -rf "$destDir"
 	echo "Downloading $repoName from GitHub..."
 	git clone "https://github.com/cameronraschke/${repoName}" "$destDir"
-	gitStaus=$?
+	gitStatus=$?
 	local i=10
-	while [ $gitStatus -ne 0 ] && [ $i -gt 0 ]; do
+	while [ "$gitStatus" -ne 0 ] && [ "$i" -gt 0 ]; do
 		echo "Download failed, retrying..."
 		sleep 1
 		rm -rf "$destDir"
@@ -31,13 +49,15 @@ function tryGithubDownload(repoName, destDir) {
 		gitStatus=$?
 		((i--))
 	done
-	if [[ $gitStatus -ne 0 ]]; then
+	if [[ "$gitStatus" -ne 0 ]]; then
 		echo "Download of '${repoName}' failed after ${i} attempts. Exiting..."
 		exit 1
 	fi
 }
 
-function installPackage(packageDir, packageName) {
+function installPackage() {
+	local packageDir="$1"
+	local packageName="$2"
 	if [[ -z $packageDir || -z $packageName ]]; then
 		echo "installPackage() requires two arguments: packageDir and packageName. Exiting..."
 		exit 1
@@ -49,21 +69,25 @@ function installPackage(packageDir, packageName) {
 			dpkg --purge uit-client
 		else
 			dpkg --remove remove "$packageName"
+		fi
 	fi
 
 	if [[ -d "$packageDir" ]]; then
-		(cd "$packageDir"
-		chmod 755 "$packageDir/DEBIAN"
-		chmod 755 "$packageDir/DEBIAN/control"
-		chmod 755 "$packageDir/DEBIAN/postinst"
-		dpkg-deb --build --root-owner-group "$packageDir"
-		packagePath="$packageDir.deb")
+		(
+			cd "$packageDir"
+			chmod 755 "$packageDir/DEBIAN"
+			chmod 755 "$packageDir/DEBIAN/control"
+			chmod 755 "$packageDir/DEBIAN/postinst"
+			dpkg-deb --build --root-owner-group "$packageDir"
+		)
+		packagePath="$packageDir.deb"
 		if [[ -f "$packagePath" ]]; then
 			echo "Installing package '$packageName' from '$packagePath'..."
 			if [[ $packageName == "uit-client" ]]; then
 				mv -v "$packagePath" /srv/uit-toolbox/client/pkg/uit-toolbox-client.deb
+			else
+				dpkg --install "$packagePath"
 			fi
-			dpkg --install "$packagePath"
 		else
 			echo "Package '$packageName' not found at '$packagePath'. Exiting..."
 			exit 1
@@ -71,27 +95,22 @@ function installPackage(packageDir, packageName) {
 	fi
 }
 
-function cleanup() {
-	rm -rf "$uitAPIDir"
-	rm -rf "$uitWebDir"
-	rm -rf "$uitClientDir"
-}
-
 if [[ -z $downloadFromGithub || $downloadFromGithub == "y" || $downloadFromGithub == "Y" ]]; then
   rm -r /tmp/uit-toolbox/
   tryGithubDownload "uit-api" "$uitAPIDir"
-	tryGithubDownload "uit-web" "$uitWebDir"
 	tryGithubDownload "uit-client" "$uitClientDir"
 	tryGithubDownload "uit-serverd" "$uitServerdDir"
+	tryGithubDownload "uit-web" "$uitWebDir"
   echo "Download complete."
 else 
   echo "Not downloading."
 fi
 
 # installPackage skips installation of client package on server
-intallPackage "$uitClientDir/uit-client_2.0-1_amd64" "uit-web"
 installPackage "$uitAPIDir/uit-api_1.0-1_amd64" "uit-api"
-intallPackage "$uitWebDir/uit-web_1.0-1_amd64" "uit-web"
+installPackage "$uitClientDir/uit-client_2.0-1_amd64" "uit-client"
+installPackage "$uitWebDir/uit-web_1.0-1_amd64" "uit-web"
+# Server has to be last because it depends on the other packages being installed first
 installPackage "$uitServerdDir/uit-serverd_1.0-1_amd64" "uit-serverd"
 
 
@@ -105,4 +124,4 @@ rm /srv/uit-toolbox/client/pkg/uit-clientd
 )
 
 systemctl daemon-reload
-systemctl enable --now uit-serverd
+systemctl enable --now uit-api
