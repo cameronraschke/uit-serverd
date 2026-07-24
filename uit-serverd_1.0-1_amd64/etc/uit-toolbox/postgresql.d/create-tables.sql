@@ -782,6 +782,7 @@ CREATE TABLE IF NOT EXISTS os_info (
 	ad_domain VARCHAR(64) DEFAULT NULL,
 	ad_computer_name VARCHAR(128) DEFAULT NULL,
 	ad_distinguished_name VARCHAR(512) DEFAULT NULL,
+	ad_sid VARCHAR(128) DEFAULT NULL,
 	is_intune_joined BOOLEAN DEFAULT NULL,
 	secure_boot_enabled BOOLEAN DEFAULT NULL,
 	installed_apps TEXT[] DEFAULT NULL,
