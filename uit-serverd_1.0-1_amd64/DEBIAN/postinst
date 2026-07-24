@@ -82,7 +82,7 @@ function checkNullConfigVals() {
 			echo ""
 			read -p "Value for ${checkVal} is missing. Continue? [y/N] " userInput
 			if [[ -z $userInput || $userInput == "n" || $userInput == "N" ]]; then
-				echo "Exiting..."
+				echo "Value for ${checkVal} is missing, exiting..."
 				exit 1
 				elif [[ $userInput == "y" || $userInput == "Y" ]]; then
 					:

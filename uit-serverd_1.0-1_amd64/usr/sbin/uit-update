@@ -8,7 +8,7 @@ uitWebDir="/tmp/uit-web"
 uitClientDir="/tmp/uit-client"
 
 function cleanup() {
-	echo "Exiting..."
+	echo "Exit signal received..."
 	# if [[ -d "$uitAPIDir" ]]; then
 	# 	rm -rf "$uitAPIDir"
 	# fi
@@ -30,7 +30,11 @@ if [[ "$EUID" > 0 ]]; then
   exit 0
 fi
 
-downloadFromGithub="$1"
+downloadFromGithub=""
+
+if [[ $# -gt 0 ]]; then
+	downloadFromGithub="$1"
+fi
 
 if [[ -z $downloadFromGithub ]]; then
 	read -p "Download from GitHub? [Y/n]: " downloadFromGithub
@@ -110,14 +114,13 @@ function installPackage() {
 }
 
 if [[ -z $downloadFromGithub || $downloadFromGithub == "y" || $downloadFromGithub == "Y" ]]; then
-  rm -r /tmp/uit-toolbox/
   tryGithubDownload "uit-api" "$uitAPIDir"
 	tryGithubDownload "uit-client" "$uitClientDir"
 	tryGithubDownload "uit-serverd" "$uitServerdDir"
 	tryGithubDownload "uit-web" "$uitWebDir"
   echo "Download complete."
 else 
-  echo "Not downloading."
+  echo "Not downloading from GitHub."
 fi
 
 # Disable uit-api before installing packages
