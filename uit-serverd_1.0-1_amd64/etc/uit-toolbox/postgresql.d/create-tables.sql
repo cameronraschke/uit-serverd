@@ -464,6 +464,7 @@ CREATE TABLE IF NOT EXISTS hardware_data (
 	chassis_type VARCHAR(16) DEFAULT NULL,
 	device_type VARCHAR(64) DEFAULT NULL,
 	tpm_version VARCHAR(24) DEFAULT NULL,
+	tpm_public_key VARCHAR(64) DEFAULT NULL, 
 	cpu_manufacturer VARCHAR(20) DEFAULT NULL,
 	cpu_model VARCHAR(46) DEFAULT NULL,
 	cpu_maxspeed SMALLINT DEFAULT NULL,
