@@ -78,6 +78,6 @@ echo "New chain created: /usr/local/share/ca-certificates/uit-web.chain.crt"
 
 # certtool --certificate-info --infile "${WWW_CRT}"
 
-read -p "Press [Enter] key to restart uit-web.service..."
-systemctl restart uit-web.service
+read -p "Press [Enter] key to restart uit-api.service..."
+systemctl restart uit-api.service
 exit 0

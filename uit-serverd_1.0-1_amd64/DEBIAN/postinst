@@ -10,6 +10,7 @@ fi
 unset 'configArr'
 declare -A configArr
 
+
 function createNecessaryDirs() {
 	# Directories for uit-client (HTTP boot, uit-client package, configs)
 	mkdir -p /srv/uit-toolbox/client/configs/
@@ -23,10 +24,38 @@ function createNecessaryDirs() {
 
 	# Directories for NFS
 	mkdir -p /srv/nfs/uit-toolbox/images
+
+	# Backup dir
+	mkdir -p /opt/uit-toolbox/sql-backups
+}
+
+function updateFilePermissions() {
+	# Executables
+	chmod 750 /usr/sbin/uit-*
+	chown root:uit /usr/sbin/uit-*
+
+	# Config files
+	chown uitweb:uit /etc/uit-toolbox/ -R
+	find /etc/uit-toolbox/ -type d -exec chmod 750 {} \;
+	find /etc/uit-toolbox/ -type f -exec chmod 640 {} \;
+
+	# Files for clients
+	find /srv/uit-toolbox/ ! -path "/srv/uit-toolbox/client/iso" ! -path "/srv/uit-toolbox/client/iso/*" -exec chown uitweb:uit {} \;
+	find /srv/uit-toolbox/ -type d -not -path "*/iso*" -exec chmod 750 {} \;
+	find /srv/uit-toolbox/ -type f -not -path "*/iso/*" -exec chmod 640 {} \;
+
+	# NFS
+	find /srv/nfs/ -type d -exec chmod 755 {} \;
+	chown nobody:nogroup /srv/nfs/uit-toolbox/images -R
+
+	# Backup dirs
+	chown root:uit /opt/uit-toolbox/sql-backups -R
+	find /opt/uit-toolbox/sql-backups -type d -exec chmod 770 {} \;
+	find /opt/uit-toolbox/sql-backups -type f -exec chmod 660 {} \;
 }
 
 # Get config values from /etc/uit-toolbox/uit-toolbox.json
-getConfigValue() {
+function getConfigValue() {
 	local key="$1"
 	local trim_spaces="${2:-true}"
 	local value
@@ -61,7 +90,6 @@ function checkNullConfigVals() {
 
 function initConfig() {
 	## Server config
-
 	# Load config values (values that need spaces preserved are marked with 'false')
 	configArr[UIT_SERVER_ADMIN_PASSWD]=$(getConfigValue "UIT_SERVER_ADMIN_PASSWD")
 	configArr[UIT_CLIENT_DB_PASSWD]=$(getConfigValue "UIT_CLIENT_DB_PASSWD")
@@ -103,71 +131,51 @@ function initConfig() {
 }
 
 
-## Web server setup
-# Certs
-chmod 750 /usr/sbin/uit-*
-chown root:uit /usr/sbin/uit-*
-if [[ -x /usr/sbin/uit-update-certs ]]; then
-	if [[ ! -f /usr/local/share/ca-certificates/uit-ca.crt ]]; then
-		uit-update-certs --update-ca
+function updateCerts() {
+	if [[ -x /usr/sbin/uit-update-certs ]]; then
+		if [[ ! -f /usr/local/share/ca-certificates/uit-ca.crt ]]; then
+			uit-update-certs --update-ca
+		fi
+		if [[ ! -f /usr/local/share/ca-certificates/uit-ca-intermediate.crt ]]; then
+			uit-update-certs --update-intermediate
+		fi
+		if [[ ! -f /usr/local/share/ca-certificates/uit-web.crt ]]; then
+			uit-update-certs
+		fi
+	else 
+		echo "uit-update-certs not found. Exiting."
+		exit 1
 	fi
-	if [[ ! -f /usr/local/share/ca-certificates/uit-ca-intermediate.crt ]]; then
-		uit-update-certs --update-intermediate
-	fi
-	if [[ ! -f /usr/local/share/ca-certificates/uit-web.crt ]]; then
-		uit-update-certs
-	fi
-else 
-	echo "uit-update-certs not found. Exiting."
-	exit 1
-fi
+}
 
 
-## PostgreSQL setup
-# Update tables & procedures
-echo "Updating SQL tables & procedures..."
-sudo -u postgres psql uitdb < /etc/uit-toolbox/postgresql.d/create-tables.sql
-sudo -u postgres psql uitdb < /etc/uit-toolbox/postgresql.d/create-procedures.sql
+function configurePostgres() {
+	# Update tables & procedures
+	echo "Updating SQL tables & procedures..."
+	sudo -u postgres psql uitdb < /etc/uit-toolbox/postgresql.d/create-tables.sql
+	sudo -u postgres psql uitdb < /etc/uit-toolbox/postgresql.d/create-procedures.sql
 
-## Uncomment on first-time setup
-#sudo -u postgres psql --command="CREATE DATABASE uitdb;"
-#sudo -u postgres psql --command="CALL sqlCreateUsers();" uitdb
-sudo -u postgres psql --command="CALL sqlPermissions();" uitdb
+	## Uncomment on first-time setup
+	#sudo -u postgres psql --command="CREATE DATABASE uitdb;"
+	#sudo -u postgres psql --command="CALL sqlCreateUsers();" uitdb
+	sudo -u postgres psql --command="CALL sqlPermissions();" uitdb
 
-# Set passwords for various services
-echo "Updating SQL Passwords..."
-sudo -u postgres psql --command="ALTER USER cameron WITH PASSWORD '${configArr[UIT_SERVER_ADMIN_PASSWD]}';"
-sudo -u postgres psql --command="ALTER USER uitclient WITH PASSWORD '${configArr[UIT_CLIENT_DB_PASSWD]}';"
-sudo -u postgres psql --command="ALTER USER uitweb WITH PASSWORD '${configArr[UIT_WEB_DB_PASSWD]}';"
+	# Set passwords for various services
+	echo "Updating SQL Passwords..."
+	sudo -u postgres psql --command="ALTER USER cameron WITH PASSWORD '${configArr[UIT_SERVER_ADMIN_PASSWD]}';"
+	sudo -u postgres psql --command="ALTER USER uitclient WITH PASSWORD '${configArr[UIT_CLIENT_DB_PASSWD]}';"
+	sudo -u postgres psql --command="ALTER USER uitweb WITH PASSWORD '${configArr[UIT_WEB_DB_PASSWD]}';"
 
-# Update SQL Permissions
-echo "Updating PSQL Permissions..."
-sudo -u postgres psql --command="CALL sqlPermissions();" uitdb
-
-
-## File permissions
-chown uitweb:uit /etc/uit-toolbox/ -R
-find /etc/uit-toolbox/ -type d -exec chmod 750 {} \;
-find /etc/uit-toolbox/ -type f -exec chmod 640 {} \;
-
-find /srv/uit-toolbox/ ! -path "/srv/uit-toolbox/client/iso" ! -path "/srv/uit-toolbox/client/iso/*" -exec chown uitweb:uit {} \;
-find /srv/uit-toolbox/ -type d -not -path "*/iso*" -exec chmod 750 {} \;
-find /srv/uit-toolbox/ -type f -not -path "*/iso/*" -exec chmod 640 {} \;
-
-find /srv/nfs/ -type d -exec chmod 755 {} \;
-chown nobody:nogroup /srv/nfs/uit-toolbox/images -R
-
-chown root:uit /opt/uit-toolbox/sql-backups -R
-find /opt/uit-toolbox/sql-backups -type d -exec chmod 770 {} \;
-find /opt/uit-toolbox/sql-backups -type f -exec chmod 660 {} \;
+	# Update SQL Permissions
+	echo "Updating PSQL Permissions..."
+	sudo -u postgres psql --command="CALL sqlPermissions();" uitdb
+}
 
 
 ## Misc setup
-mkdir -p /opt/uit-toolbox/sql-backups
 echo -e "\n" >> /etc/cron.d/uit-cron
 
 function main() {
-
 	if [[ ! -f /etc/uit-toolbox/uit-toolbox.json ]]; then
 		echo "Missing /etc/uit-toolbox/uit-toolbox.json. Exiting..."
 		exit 1
@@ -197,5 +205,8 @@ function main() {
 
 	createNecessaryDirs
 	initConfig
+	updateCerts
+	configurePostgres
+	updateFilePermissions
 }
 main

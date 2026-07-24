@@ -8,18 +8,19 @@ uitWebDir="/tmp/uit-web"
 uitClientDir="/tmp/uit-client"
 
 function cleanup() {
-	if [[ -d "$uitAPIDir" ]]; then
-		rm -rf "$uitAPIDir"
-	fi
-	if [[ -d "$uitWebDir" ]]; then
-		rm -rf "$uitWebDir"
-	fi
-	if [[ -d "$uitClientDir" ]]; then
-		rm -rf "$uitClientDir"
-	fi
-	if [[ -d "$uitServerdDir" ]]; then
-		rm -rf "$uitServerdDir"
-	fi
+	echo "Exiting..."
+	# if [[ -d "$uitAPIDir" ]]; then
+	# 	rm -rf "$uitAPIDir"
+	# fi
+	# if [[ -d "$uitWebDir" ]]; then
+	# 	rm -rf "$uitWebDir"
+	# fi
+	# if [[ -d "$uitClientDir" ]]; then
+	# 	rm -rf "$uitClientDir"
+	# fi
+	# if [[ -d "$uitServerdDir" ]]; then
+	# 	rm -rf "$uitServerdDir"
+	# fi
 }
 
 trap cleanup EXIT
@@ -35,23 +36,34 @@ if [[ -z $downloadFromGithub ]]; then
 	read -p "Download from GitHub? [Y/n]: " downloadFromGithub
 fi
 
+function createGitFolder() {
+	local repoName="$1"
+	local destDir="$2"
+	git init "$destDir"
+	git -C "$destDir" remote add origin "https://github.com/cameronraschke/${repoName}.git"
+	git -C "$destDir" fetch --depth 1 origin main
+	git -C "$destDir" reset --hard origin/main
+	if [[ $? -ne 0 ]]; then
+		echo "Failed to create git folder for ${repoName}. Exiting..."
+		return 1
+	fi
+	return 0
+}
+
 function tryGithubDownload() {
 	local repoName="$1"
 	local destDir="$2"
-	rm -rf "$destDir"
-	echo "Downloading $repoName from GitHub..."
-	git clone "https://github.com/cameronraschke/${repoName}" "$destDir"
-	gitStatus=$?
 	local i=10
-	while [ "$gitStatus" -ne 0 ] && [ "$i" -gt 0 ]; do
+
+	echo "Downloading $repoName from GitHub..."
+
+	while ! createGitFolder "$repoName" "$destDir" && (( i > 0 )); do
 		echo "Download failed, retrying..."
 		sleep 1
-		rm -rf "$destDir"
-		git clone "https://github.com/cameronraschke/${repoName}" "$destDir"
-		gitStatus=$?
 		((i--))
 	done
-	if [[ "$gitStatus" -ne 0 ]]; then
+
+	if (( i == 0 )); then
 		echo "Download of '${repoName}' failed after ${i} attempts. Exiting..."
 		exit 1
 	fi
