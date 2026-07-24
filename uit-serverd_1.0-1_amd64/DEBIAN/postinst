@@ -3,8 +3,8 @@
 set -eu +o pipefail
 
 if [[ $EUID -ne 0 ]]; then
-	 echo "This script must be run as root" 
-	 exit 1
+	echo "This script must be run as root" 
+	exit 1
 fi
 
 unset 'configArr'
@@ -61,8 +61,12 @@ function getConfigValue() {
 	local value
 	value=$(jq -r ".${key}" /etc/uit-toolbox/uit-toolbox.json 2>/dev/null)
 	jqStatus=$?
-	if [[ ! -f /etc/uit-toolbox/uit-toolbox.json || (( jqStatus > 0 )) ]]; then
+	if [[ ! -f /etc/uit-toolbox/uit-toolbox.json ]]; then
 		echo "Error reading /etc/uit-toolbox/uit-toolbox.json. Exiting..."
+		exit 1
+	fi
+	if (( jqStatus > 0 )); then
+		echo "jq returned an error while reading /etc/uit-toolbox/uit-toolbox.json. Exiting..."
 		exit 1
 	fi
 	if [[ "$trim_spaces" == "true" ]]; then
