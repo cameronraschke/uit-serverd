@@ -59,8 +59,12 @@ function getConfigValue() {
 	local key="$1"
 	local trim_spaces="${2:-true}"
 	local value
-	value=$(jq -r ".${key}" /etc/uit-toolbox/uit-toolbox.json)
-	if [[ ! -f /etc/uit-toolbox/uit-toolbox.json || -z $value ]];
+	value=$(jq -r ".${key}" /etc/uit-toolbox/uit-toolbox.json 2>/dev/null)
+	jqStatus=$?
+	if [[ ! -f /etc/uit-toolbox/uit-toolbox.json || (( jqStatus > 0 )) ]]; then
+		echo "Error reading /etc/uit-toolbox/uit-toolbox.json. Exiting..."
+		exit 1
+	fi
 	if [[ "$trim_spaces" == "true" ]]; then
 			value=$(echo "$value" | tr -d '[:space:]')
 	fi
