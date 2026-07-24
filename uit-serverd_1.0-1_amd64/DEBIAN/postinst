@@ -135,7 +135,6 @@ function initConfig() {
 	done
 
 	checkNullConfigVals "${!configArr[@]}"
-	echo ${configArr[@]}
 }
 
 
