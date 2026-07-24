@@ -213,8 +213,8 @@ function main() {
 
 	createNecessaryDirs
 	initConfig
+	updateFilePermissions
 	updateCerts
 	configurePostgres
-	updateFilePermissions
 }
 main
