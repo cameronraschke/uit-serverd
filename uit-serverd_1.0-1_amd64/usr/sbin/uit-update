@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-systemctl disable --now uit-api
+set -eu +o pipefail
 
 uitServerdDir="/tmp/uit-serverd"
 uitAPIDir="/tmp/uit-api"
@@ -107,6 +107,9 @@ if [[ -z $downloadFromGithub || $downloadFromGithub == "y" || $downloadFromGithu
 else 
   echo "Not downloading."
 fi
+
+# Disable uit-api before installing packages
+systemctl disable --now uit-api &>/dev/null
 
 # installPackage skips installation of client package on server
 installPackage "$uitAPIDir/uit-api_1.0-1_amd64" "uit-api"
