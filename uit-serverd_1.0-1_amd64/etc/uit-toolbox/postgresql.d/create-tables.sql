@@ -588,10 +588,10 @@ VALUES
 		job_hidden = EXCLUDED.job_hidden
 	;
 
-CREATE TABLE IF NOT EXISTS static_ad_domains (
-	domain_name VARCHAR(64) PRIMARY KEY,
-	domain_name_formatted VARCHAR(64) DEFAULT NULL,
-	domain_sort_order SMALLINT NOT NULL DEFAULT 0
+CREATE TABLE IF NOT EXISTS static_ou_names (
+	ou_name VARCHAR(64) PRIMARY KEY,
+	ou_name_formatted VARCHAR(64) DEFAULT NULL,
+	ou_name_sort_order SMALLINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS static_image_names (
@@ -767,11 +767,11 @@ CREATE TABLE IF NOT EXISTS os_info (
 	client_uuid UUID PRIMARY KEY,
 	transaction_uuid UUID NOT NULL,
 	time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	os_install_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	os_install_date TIMESTAMP WITH TIME ZONE DEFAULT NULL,
 	os_vendor VARCHAR(64) DEFAULT NULL,
 	os_platform VARCHAR(64) DEFAULT NULL,
 	os_architecture VARCHAR(16) DEFAULT NULL,
-	os_name VARCHAR(128) NOT NULL,
+	os_name VARCHAR(128) DEFAULT NULL,
 	os_version VARCHAR(64) DEFAULT NULL,
 	windows_display_version VARCHAR(4) DEFAULT NULL,
 	windows_build_number INTEGER DEFAULT NULL,
@@ -782,6 +782,7 @@ CREATE TABLE IF NOT EXISTS os_info (
 	ad_domain VARCHAR(64) DEFAULT NULL,
 	ad_computer_name VARCHAR(128) DEFAULT NULL,
 	ad_distinguished_name VARCHAR(512) DEFAULT NULL,
+	ad_ou VARCHAR(64) DEFAULT NULL,
 	ad_sid VARCHAR(128) DEFAULT NULL,
 	is_intune_joined BOOLEAN DEFAULT NULL,
 	secure_boot_enabled BOOLEAN DEFAULT NULL,
@@ -791,6 +792,11 @@ CREATE TABLE IF NOT EXISTS os_info (
 	CONSTRAINT os_info_client_uuid_fkey
 		FOREIGN KEY (client_uuid)
 			REFERENCES ids(uuid)
+		ON UPDATE CASCADE
+		ON DELETE SET NULL,
+	CONSTRAINT os_info_ad_ou_fkey
+		FOREIGN KEY (ad_ou)
+			REFERENCES static_ou_names(ou_name)
 		ON UPDATE CASCADE
 		ON DELETE SET NULL
 );
