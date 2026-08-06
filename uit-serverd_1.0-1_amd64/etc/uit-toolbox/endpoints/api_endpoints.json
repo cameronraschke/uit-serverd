@@ -102,5 +102,6 @@
 	"/api/client/os/delete_all": {
 		"allowed_methods": ["DELETE"]
 	},
-	"/admin/realtime-client-info": {}
+	"/admin/realtime-client-info": {},
+	"/admin/rate-limiter-info": {}
 }
