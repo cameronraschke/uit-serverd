@@ -1,0 +1,219 @@
+{
+	"host": {
+		"admin": {
+			"realtime_data": {},
+			"overview": {}
+		},
+		"app_config": {
+			"overview": {}
+		},
+		"app_state": {
+			"overview": {}
+		},
+		"auth": {
+			"is_valid": "bool",
+			"login": {}
+		},
+		"inventory": {
+			"overview": {}
+		},
+		"job_queue": {
+			"overview": {},
+			"queue_position": "int",
+			"job_name": "string"
+		},
+		"metadata": {
+			"current_time": "timestamp"
+		}
+	},
+	"client": {
+		"metadata": {
+			"errors": {
+				"broken_component": "string",
+				"error_level": "string",
+				"error_message": "string",
+				"error_type": "string",
+				"is_broken": "bool",
+				"needs_attention": "bool"
+			}
+		},
+		"os": {
+			"name": "string",
+			"version": "string",
+			"metadata": {
+				"last_updated": "timestamp"
+			},
+			"firmware": {
+				"bios": {
+					"bios_release_date": "timestamp",
+					"bios_version": "string"
+				},
+				"disk": {
+					"is_encrypted": "bool"
+				},
+				"secure_boot": {
+					"enabled": "bool"
+				},
+				"tpm": {
+					"enabled": "bool",
+					"is_present": "bool",
+					"version": "string"
+				}
+			},
+			"hostname": "string",
+			"windows": {
+				"admin_users": ["string_arr"],
+				"ad": {
+					"intune_joined": "bool",
+					"domain_joined": "bool",
+					"domain_name": "string",
+					"ou_name": "string",
+					"dn_string": "string"
+				}
+			}
+		},
+		"software": {
+			"metadata": {
+				"last_updated": "timestamp"
+			},
+			"client_app": {
+				"client_app_uptime": "int",
+				"config": {},
+				"system_uptime": "int",
+				"version": "string"
+			},
+			"windows": {
+				"installed_apps": ["string_arr"]
+			}
+		},
+		
+		"hardware": {
+			"metadata": {
+				"errors": {
+					"broken_component": "string",
+					"error_level": "string",
+					"error_message": "string",
+					"error_type": "string",
+					"is_broken": "bool",
+					"needs_attention": "bool"
+				},
+				"last_updated": "timestamp"
+			},
+			"cpu": {
+				"manufacturer": "string",
+				"model": "string",
+				"max_speed_mhz": "int",
+				"core_count": "int",
+				"thread_count": "int"
+			},
+			"device_type": "string",
+			"disk": {
+				"capacity_kb": "int",
+				"firmware_version": "string",
+				"health": {
+					"health_pcnt": "float",
+					"total_writes_kb": "int",
+					"total_reads_kb": "int",
+					"power_on_hours": "int",
+					"power_cycles": "int"
+				},
+				"interface": "string",
+				"is_removed": "bool",
+				"manufacturer": "string",
+				"model": "string"
+			},
+			"memory": [
+				{
+				"serial": "string",
+				"capacity_kb": "int",
+				"speed_mhz": "int"
+				}
+			],
+			"model": "string",
+			"net": {
+				"ethernet": {
+					"if_name": "string",
+					"is_present": "bool",
+					"mac_addr": "string",
+					"link_speed_mbit": "int"
+				},
+				"wifi": {
+					"is_present": "bool",
+					"mac_addr": "string"
+				}
+			},
+			"power": {
+				"battery": {
+					"design_capacity": "int",
+					"health": {
+						"charge_cycles": "int",
+						"current_max_capacity": "int",
+						"health_pcnt": "float"
+					},
+					"is_present": "bool",
+					"manufacture_date": "timestamp",
+					"model": "string",
+					"serial": "string"
+				}
+			},
+			"serial": "string",
+			"sku": "string"
+		},
+		"jobs": {
+			"most_recent": {
+				"clone": {
+					"disk_image_name": "string",
+					"duration": "int",
+					"job_completed_at": "timestamp",
+					"successful": "bool"
+				},
+				"erase": {
+					"duration": "int",
+					"exists": "bool",
+					"job_completed_at": "timestamp",
+					"mode": "string",
+					"successful": "bool"
+				}
+			}
+		}
+	},
+	"inventory": {
+		"metadata": {
+			"identifiers": {
+				"client_uuid": "string",
+				"serial": "string",
+				"tag": "int"
+			},
+			"last_updated": "timestamp"
+		},
+		"checkouts": {
+			"historical_log": [
+				{
+					"checkout_date": "timestamp",
+					"customer_name": "string",
+					"log_entry_time": "timestamp",
+					"return_date": "timestamp",
+					"transaction_uuid": "string"
+				}
+			],
+			"is_checked_out": "bool"
+		},
+		"location": {
+			"building": "string",
+			"department": "string",
+			"description": "string",
+			"room": "string"
+		},
+		"property": {
+			"acquired_date": "timestamp",
+			"custodian": "string",
+			"retired_date": "timestamp"
+		}
+	}
+}
+	
+	
+
+			
+		
+
