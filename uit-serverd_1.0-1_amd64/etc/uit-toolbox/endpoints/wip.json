@@ -1,13 +1,13 @@
 {
 	"host": {
 		"admin": {
+			"app_config": {
+				"overview": {}
+			},
+			"app_state": {
+				"overview": {}
+			},
 			"realtime_data": {},
-			"overview": {}
-		},
-		"app_config": {
-			"overview": {}
-		},
-		"app_state": {
 			"overview": {}
 		},
 		"auth": {
@@ -35,58 +35,30 @@
 				"error_type": "string",
 				"is_broken": "bool",
 				"needs_attention": "bool"
+			},
+			"identifiers": {
+				"client_uuid": "string",
+				"serial": "string",
+				"tag": "int"
 			}
 		},
-		"os": {
-			"name": "string",
-			"version": "string",
-			"metadata": {
-				"last_updated": "timestamp"
+		"firmware": {
+			"bios": {
+				"bios_release_date": "timestamp",
+				"bios_version": "string"
 			},
-			"firmware": {
-				"bios": {
-					"bios_release_date": "timestamp",
-					"bios_version": "string"
-				},
-				"disk": {
-					"is_encrypted": "bool"
-				},
-				"secure_boot": {
-					"enabled": "bool"
-				},
-				"tpm": {
-					"enabled": "bool",
-					"is_present": "bool",
-					"version": "string"
-				}
+			"disk": {
+				"is_encrypted": "bool"
 			},
-			"hostname": "string",
-			"windows": {
-				"admin_users": ["string_arr"],
-				"ad": {
-					"intune_joined": "bool",
-					"domain_joined": "bool",
-					"domain_name": "string",
-					"ou_name": "string",
-					"dn_string": "string"
-				}
-			}
-		},
-		"software": {
-			"metadata": {
-				"last_updated": "timestamp"
+			"secure_boot": {
+				"enabled": "bool"
 			},
-			"client_app": {
-				"client_app_uptime": "int",
-				"config": {},
-				"system_uptime": "int",
+			"tpm": {
+				"enabled": "bool",
+				"is_present": "bool",
 				"version": "string"
-			},
-			"windows": {
-				"installed_apps": ["string_arr"]
 			}
 		},
-		
 		"hardware": {
 			"metadata": {
 				"errors": {
@@ -100,10 +72,10 @@
 				"last_updated": "timestamp"
 			},
 			"cpu": {
-				"manufacturer": "string",
-				"model": "string",
-				"max_speed_mhz": "int",
 				"core_count": "int",
+				"manufacturer": "string",
+				"max_speed_mhz": "int",
+				"model": "string",
 				"thread_count": "int"
 			},
 			"device_type": "string",
@@ -112,20 +84,23 @@
 				"firmware_version": "string",
 				"health": {
 					"health_pcnt": "float",
-					"total_writes_kb": "int",
-					"total_reads_kb": "int",
+					"power_cycles": "int",
 					"power_on_hours": "int",
-					"power_cycles": "int"
+					"smart_errors": "int",
+					"total_reads_kb": "int",
+					"total_writes_kb": "int"
 				},
 				"interface": "string",
 				"is_removed": "bool",
 				"manufacturer": "string",
-				"model": "string"
+				"model": "string",
+				"serial": "string"
 			},
+			"manufacturer": "string",
 			"memory": [
 				{
-				"serial": "string",
 				"capacity_kb": "int",
+				"serial": "string",
 				"speed_mhz": "int"
 				}
 			],
@@ -144,7 +119,7 @@
 			},
 			"power": {
 				"battery": {
-					"design_capacity": "int",
+					"factory_design_capacity": "int",
 					"health": {
 						"charge_cycles": "int",
 						"current_max_capacity": "int",
@@ -152,38 +127,73 @@
 					},
 					"is_present": "bool",
 					"manufacture_date": "timestamp",
+					"manufacturer": "string",
 					"model": "string",
 					"serial": "string"
 				}
 			},
 			"serial": "string",
-			"sku": "string"
-		},
-		"jobs": {
-			"most_recent": {
-				"clone": {
-					"disk_image_name": "string",
-					"duration": "int",
-					"job_completed_at": "timestamp",
-					"successful": "bool"
-				},
-				"erase": {
-					"duration": "int",
-					"exists": "bool",
-					"job_completed_at": "timestamp",
-					"mode": "string",
-					"successful": "bool"
+			"sku": "string",
+			"jobs": {
+				"most_recent": {
+					"clone": {
+						"disk_image_name": "string",
+						"duration": "int",
+						"job_completed_at": "timestamp",
+						"job_started_at": "timestamp",
+						"successful": "bool"
+					},
+					"erase": {
+						"duration": "int",
+						"exists": "bool",
+						"job_completed_at": "timestamp",
+						"job_started_at": "timestamp",
+						"mode": "string",
+						"successful": "bool"
+					}
 				}
+			}
+		},
+		"os": {
+			"name": "string",
+			"version": "string",
+			"metadata": {
+				"last_updated": "timestamp"
+			},
+			
+			"hostname": "string",
+			"windows": {
+				"admin_users": ["string_arr"],
+				"ad": {
+					"domain_name": "string",
+					"is_domain_joined": "bool",
+					"is_intune_joined": "bool",
+					"ou_name": "string",
+					"dn_string": "string"
+				}
+			}
+		},
+		"software": {
+			"metadata": {
+				"last_updated": "timestamp"
+			},
+			"client_app": {
+				"config": {},
+				"live_data": {
+					"client_app_uptime": "int",
+					"last_heard": "timestamp",
+					"live_screenshot": "byte_arr",
+					"system_uptime": "int"
+				},
+				"version": "string"
+			},
+			"windows": {
+				"installed_apps": ["string_arr"]
 			}
 		}
 	},
 	"inventory": {
 		"metadata": {
-			"identifiers": {
-				"client_uuid": "string",
-				"serial": "string",
-				"tag": "int"
-			},
 			"last_updated": "timestamp"
 		},
 		"checkouts": {
@@ -197,6 +207,27 @@
 				}
 			],
 			"is_checked_out": "bool"
+		},
+		"client_note": "string",
+		"files": {
+			"data": {
+				"bytes": "byte_arr"
+			},
+			"manifest": [{
+				"caption": "string",
+				"file_size_kb": "int",
+				"file_type": "string",
+				"file_url": "string",
+				"file_uuid": "string",
+				"images": {
+					"resolution_x": "int",
+					"resolution_y": "int"
+				},
+				"mime_type": "string",
+				"pinned": "bool",
+				"sha256_hash": "string",
+				"upload_timestamp": "timestamp"
+			}]
 		},
 		"location": {
 			"building": "string",
