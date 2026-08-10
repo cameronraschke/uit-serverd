@@ -1,19 +1,49 @@
 {
 	"host": {
 		"admin": {
-			"app_config": {
-				"overview": {}
-			},
 			"app_state": {
-				"overview": {}
+				"overview": {
+					"timeout_duration": "int",
+					"ip_addr": {
+						"api_limiter_map": {"type": "string", "last_seen": "timestamp"},
+						"auth_limiter_map": {"type": "string", "last_seen": "timestamp"},
+						"file_limiter_map": {"type": "string", "last_seen": "timestamp"},
+						"webserver_limiter_map": {"type": "string", "last_seen": "timestamp"}
+					}
+				}
 			},
-			"realtime_data": {},
-			"overview": {}
+			"realtime_data": {
+				"tagnumber": {
+					"client_uuid": "string",
+					"serial": "string",
+					"last_heard": "timestamp",
+					"last_heard_in_db": "timestamp",
+					"system_uptime": "timestamp",
+					"app_uptime": "timestamp",
+					"live_screenshot": "byte_arr"
+				}
+			}
 		},
 		"auth": {
 			"is_valid": "bool",
 			"login": {}
 		},
+		"client_app_config": {
+			"UIT_CLIENT_DB_USER": "string",
+			"UIT_CLIENT_DB_PASSWD": "string",
+			"UIT_CLIENT_DB_NAME": "string",
+			"UIT_CLIENT_DB_HOST": "string",
+			"UIT_CLIENT_DB_PORT": "string",
+			"UIT_CLIENT_NTP_HOST": "string",
+			"UIT_CLIENT_PING_HOST": "string",
+			"UIT_SERVER_HOSTNAME": "string",
+			"UIT_WEB_HTTP_HOST": "string",
+			"UIT_WEB_HTTP_PORT": "string",
+			"UIT_WEB_HTTPS_HOST": "string",
+			"UIT_WEB_HTTPS_PORT": "string",
+			"UIT_WEBMASTER_NAME": "string",
+			"UIT_WEBMASTER_EMAIL": "string"
+			},
 		"inventory": {
 			"overview": {}
 		},
