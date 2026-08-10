@@ -42,6 +42,36 @@
 				"tag": "int"
 			}
 		},
+		"client_app": {
+			"config": {},
+			"live_data": {
+				"app_uptime": "int",
+				"battery_charge_pcnt": "float",
+				"battery_status": "string",
+				"cpu_usage_pcnt": "float",
+				"cpu_mhz": "int",
+				"cpu_temp": "float",
+				"is_online": "bool",
+				"is_plugged_in": "bool",
+				"job_active": "bool",
+				"job_clone_mode": "string",
+				"job_erase_mode": "string",
+				"job_name": "string",
+				"job_name_formatted": "string",
+				"job_queued": "bool",
+				"job_queue_position": "int",
+				"kernel_updated": "bool",
+				"last_heard": "timestamp",
+				"memory_usage_kb": "int",
+				"memory_capacity_kb": "int",
+				"net_link_speed_mbit": "float",
+				"power_usage_watts": "float",
+				"status": "string",
+				"system_uptime": "int"
+			},
+			"live_screenshot": "byte_arr",
+			"version": "string"
+		},
 		"firmware": {
 			"bios": {
 				"bios_release_date": "timestamp",
@@ -155,6 +185,7 @@
 			}
 		},
 		"os": {
+			"is_installed": "bool",
 			"name": "string",
 			"version": "string",
 			"metadata": {
@@ -176,16 +207,6 @@
 		"software": {
 			"metadata": {
 				"last_updated": "timestamp"
-			},
-			"client_app": {
-				"config": {},
-				"live_data": {
-					"client_app_uptime": "int",
-					"last_heard": "timestamp",
-					"live_screenshot": "byte_arr",
-					"system_uptime": "int"
-				},
-				"version": "string"
 			},
 			"windows": {
 				"installed_apps": ["string_arr"]
