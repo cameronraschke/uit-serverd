@@ -39,14 +39,16 @@ client:
       UIT_WEBMASTER_EMAIL: string
     live:
       hardware:
-        battery_charge_pcnt: float
+        battery_charge_pcnt: int
         battery_status: string
         cpu_usage_pcnt: float
-        cpu_mhz: int
+        cpu_mhz: float
         cpu_temp: float
+        disk_temp: float
+        disk_max_temp: float
         memory_usage_kb: int
         memory_capacity_kb: int
-        net_link_speed_mbit: float
+        net_link_speed_mbit: int
         net_usage_mbit: float
         power_usage_watts: float
       job: 
