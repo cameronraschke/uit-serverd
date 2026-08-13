@@ -48,8 +48,8 @@ client:
         disk_max_temp: float
         memory_usage_kb: int
         memory_capacity_kb: int
-        net_link_speed_mbit: int
-        net_usage_mbit: float
+        net_link_speed_kbit: int
+        net_usage_kbit: float
         power_usage_watts: float
       job: 
         clone_mode: string
