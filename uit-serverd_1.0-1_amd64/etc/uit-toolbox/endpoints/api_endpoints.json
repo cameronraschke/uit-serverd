@@ -103,5 +103,6 @@
 		"allowed_methods": ["DELETE"]
 	},
 	"/admin/realtime-client-info": {},
-	"/admin/rate-limiter-info": {}
+	"/admin/rate-limiter-info": {},
+	"/api/v2/app/live/job": {}
 }
