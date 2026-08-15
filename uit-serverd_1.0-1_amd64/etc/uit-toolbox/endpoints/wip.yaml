@@ -53,13 +53,14 @@ client:
         power_usage_watts: float
       job: 
         clone_mode: string
+        disk_image_name: string
         erase_mode: string
         is_queued: bool
         is_running: bool
         name: string
         name_formatted: string
-        disk_image_name: string
         queue_position: int
+        status: string # status of the job specifically, not overall status
       status:
         app_uptime: int
         current: string
